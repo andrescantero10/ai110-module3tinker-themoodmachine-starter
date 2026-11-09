@@ -23,6 +23,12 @@ POSITIVE_WORDS = [
     "chill",
     "relaxed",
     "amazing",
+    "proud",
+    "hopeful",
+    "fire",
+    "😂",
+    "🎉",
+    ":)",
 ]
 
 NEGATIVE_WORDS = [
@@ -36,6 +42,14 @@ NEGATIVE_WORDS = [
     "stressed",
     "hate",
     "boring",
+    "exhausted",
+    "badly",
+    "ugh",
+    "died",
+    "killing",
+    "😭",
+    "💀",
+    ":(",
 ]
 
 # ---------------------------------------------------------------------
@@ -50,6 +64,20 @@ SAMPLE_POSTS = [
     "This is fine",
     "So excited for the weekend",
     "I am not happy about this",
+    "Lowkey stressed but kind of proud of myself",
+    "I absolutely love getting stuck in traffic",
+    "this new song is fire no cap",
+    "Exam went badly 😭",
+    "Just got the internship!!! 🎉",
+    "I'm fine 🙂",
+    "Not bad for a Monday",
+    "Meeting moved to 3pm",
+    "ugh my wifi died again",
+    "Exhausted but so proud of my team",
+    "that movie was sick",
+    "Had lunch, then went back to class",
+    "I never feel good after these calls",
+    "bruh this homework is killing me 💀",
 ]
 
 # Human labels for each post above.
@@ -65,6 +93,20 @@ TRUE_LABELS = [
     "neutral",   # "This is fine"
     "positive",  # "So excited for the weekend"
     "negative",  # "I am not happy about this"
+    "mixed",     # "Lowkey stressed but kind of proud of myself"
+    "negative",  # "I absolutely love getting stuck in traffic" (sarcasm)
+    "positive",  # "this new song is fire no cap"
+    "negative",  # "Exam went badly 😭"
+    "positive",  # "Just got the internship!!! 🎉"
+    "neutral",   # "I'm fine 🙂" (hard: could be read as passive aggressive)
+    "positive",  # "Not bad for a Monday"
+    "neutral",   # "Meeting moved to 3pm"
+    "negative",  # "ugh my wifi died again"
+    "mixed",     # "Exhausted but so proud of my team"
+    "positive",  # "that movie was sick" (slang)
+    "neutral",   # "Had lunch, then went back to class"
+    "negative",  # "I never feel good after these calls"
+    "negative",  # "bruh this homework is killing me 💀"
 ]
 
 # TODO: Add 5-10 more posts and labels.

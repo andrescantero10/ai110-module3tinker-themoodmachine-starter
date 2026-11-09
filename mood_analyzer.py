@@ -9,9 +9,15 @@ This class starts with very simple logic:
   - Convert that score into a mood label
 """
 
-from typing import List, Dict, Tuple, Optional
+import re
+import string
+from typing import List, Tuple, Optional
 
 from dataset import POSITIVE_WORDS, NEGATIVE_WORDS
+
+PUNCTUATION = set(string.punctuation)
+NEGATORS = {"not", "never", "no", "isn't", "wasn't", "don't", "didn't", "ain't", "can't", "won't"}
+NEGATION_WINDOW = 3
 
 
 class MoodAnalyzer:
@@ -53,8 +59,15 @@ class MoodAnalyzer:
           - Normalize repeated characters ("soooo" -> "soo")
         """
         cleaned = text.strip().lower()
-        tokens = cleaned.split()
-
+        tokens = []
+        for raw in cleaned.split():
+            # Keep text emoticons whole so stripping punctuation can't erase them.
+            if raw in self.positive_words or raw in self.negative_words:
+                tokens.append(raw)
+                continue
+            # Pull emoji attached to a word ("sad😭") out as their own tokens.
+            parts = re.findall(r"[^\W_]+(?:'[^\W_]+)?|[^\w\s]", raw)
+            tokens.extend(p for p in parts if p not in PUNCTUATION)
         return tokens
 
     # ---------------------------------------------------------------------
@@ -83,7 +96,45 @@ class MoodAnalyzer:
         #
         # Hint: if you implement negation, you may want to look at pairs of tokens,
         # like ("not", "happy") or ("never", "fun").
-        pass
+        return self._analyze(text)[0]
+
+    def _analyze(self, text: str) -> Tuple[int, List[str], List[str]]:
+        """
+        Score the text and record which tokens counted each way.
+
+        Enhancement: negation. A negator flips the next sentiment word found
+        within NEGATION_WINDOW tokens, so "not happy" counts as negative and
+        "not bad" counts as positive.
+        """
+        score = 0
+        positive_hits: List[str] = []
+        negative_hits: List[str] = []
+        negate_left = 0
+
+        for token in self.preprocess(text):
+            if token in NEGATORS:
+                negate_left = NEGATION_WINDOW
+                continue
+
+            value = 0
+            if token in self.positive_words:
+                value = 1
+            elif token in self.negative_words:
+                value = -1
+
+            if value == 0:
+                negate_left = max(0, negate_left - 1)
+                continue
+
+            if negate_left > 0:
+                value = -value
+                token = f"not {token}"
+                negate_left = 0
+
+            score += value
+            (positive_hits if value > 0 else negative_hits).append(token)
+
+        return score, positive_hits, negative_hits
 
     # ---------------------------------------------------------------------
     # Label prediction
@@ -110,7 +161,15 @@ class MoodAnalyzer:
         #   2. Return "positive" if the score is above 0.
         #   3. Return "negative" if the score is below 0.
         #   4. Return "neutral" otherwise.
-        pass
+        score, positive_hits, negative_hits = self._analyze(text)
+        # Signals pointing both ways that nearly cancel out read as "mixed".
+        if positive_hits and negative_hits and abs(score) <= 1:
+            return "mixed"
+        if score > 0:
+            return "positive"
+        if score < 0:
+            return "negative"
+        return "neutral"
 
     # ---------------------------------------------------------------------
     # Explanations (optional but recommended)
@@ -132,19 +191,7 @@ class MoodAnalyzer:
         The current implementation is a placeholder so the code runs even
         before you implement it.
         """
-        tokens = self.preprocess(text)
-
-        positive_hits: List[str] = []
-        negative_hits: List[str] = []
-        score = 0
-
-        for token in tokens:
-            if token in self.positive_words:
-                positive_hits.append(token)
-                score += 1
-            if token in self.negative_words:
-                negative_hits.append(token)
-                score -= 1
+        score, positive_hits, negative_hits = self._analyze(text)
 
         return (
             f"Score = {score} "
